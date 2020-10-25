@@ -1,0 +1,37 @@
+---
+title: "work_note"
+author: "Hanh Ngo"
+date: "10/26/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(dplyr)
+library(lubridate)
+```
+
+
+# First skim
+
+```{r read-data}
+sensor_location <- read.csv(here::here("data", "Microclimate_Sensor_Locations.csv"))
+sensor_reading <- read.csv(here::here("data", "Microclimate_Sensor_Readings.csv"))
+```
+
+```{r clean-up}
+# Check structure, notice some factor typeå
+str(sensor_reading)
+
+sensor_reading <- sensor_reading %>%
+  # Change from factor to date time
+  mutate(local_time = ymd_hms(local_time),
+  # Change some factors to character type
+         type = as.character(type),
+         units = as.character(units))
+
+# Merge with sensor location
+sensor_reading_location <- sensor_reading %>%
+  left_join(sensor_location, by = "site_id")
+```
+
