@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 library(dplyr)
 library(lubridate)
+library(naniar)
 ```
 
 
@@ -35,3 +36,72 @@ sensor_reading_location <- sensor_reading %>%
   left_join(sensor_location, by = "site_id")
 ```
 
+```{r missing-check}
+vis_miss(sensor_reading_location, warn_large_data = FALSE)
+```
+
+```{r}
+
+```
+
+
+# To clarify
+
+1. When is the summer bush fire season?  May need to describe the season this time( how is the temperature, the wind frequence, the air pressure)
+
+- Data is included for roughly a year only --> What possible limitation?
+
+2. What defines air quality? What sort of changes associated with it
+
+2.1 Definitions
+
+- PM2.5: Fine particulate matter (PM2.5) is an air pollutant that is a concern for people's health when levels in air are high. PM2.5 are tiny particles in the air that reduce visibility and cause the air to appear hazy when levels are elevated. Outdoor PM2.5 levels are most likely to be elevated on days with little or no wind or air mixing.  
+https://www.health.ny.gov/environmental/indoors/air/pmq_a.htm   
+- PM10: Small particles less than 10 micrometers in diameter pose the greatest problems, because they can get deep into your lungs, and some may even get into your bloodstream.  
+https://www.epa.gov/pm-pollution/health-and-environmental-effects-particulate-matter-pm  
+https://www.health.nsw.gov.au/environment/air/Pages/particulate-matter.aspx  
+- Humidity: Humans are very sensitive to humidity, as the skin relies on the air to get rid of moisture. The process of sweating is your body's attempt to keep cool and maintain its current temperature. If the air is at 100 percent relative humidity, sweat will not evaporate into the air. As a result, we feel much hotter than the actual temperature when the relative humidity is high  
+https://science.howstuffworks.com/nature/climate-weather/atmospheric/question651.htm  
+- Barometric Pressure: https://www.treehugger.com/how-changes-barometric-pressure-affect-your-body-4868811  
+
+2.2. Effects
+
+**Winds Affect Air Quality**
+
+Wind patterns have an impact on air quality because winds move air pollution around. For example, a coastal area with an inland mountain range may have more air pollution during the day when sea breezes push pollutants over land and lower air pollution in the evenings because the direction of the breeze reverses. Land breezes in the evenings push air pollution out over the ocean.
+
+**Temperature Affects Air Quality**
+
+Temperature can also affect air quality. In urban areas, air quality is often worse in the winter months. When the air temperature is cooler, exhaust pollutants can be trapped close to the surface beneath a layer of dense, cold air. In summer months, heated air rises and disperses pollutants from the Earth’s surface through the upper troposphere, and increased sunlight results in more harmful ground-level ozone.  
+https://scied.ucar.edu/learning-zone/air-quality/what-is-air-quality
+
+
+
+
+3. What to compare with the air quality in bush fire season - air quality in winter?
+
+- Consider source for monitoring Air Quality index in Melbourne
+
+3. How does air quality compare now - when is now? - Compare with October 2020.
+
+# To think
+1. What is the time stamp we want to use? By hour? by rolling average 24 hours? Barometric pressure is measured every 15 mins
+
+Monthly
+
+
+# Idea
+
+- A coloured chrolopeth map that showed the degree of each measurement for each location --> try to find if location would correlate with the bush fires.  
+
+# Slides Structure
+
+## Introduction of the dataset, including the source
+
+## Explaination for some of the variables
+
+## Cleaning process (if needed to link with the analysis)
+
+## Findings
+
+## Conclusions
