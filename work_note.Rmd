@@ -10,6 +10,7 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 library(dplyr)
 library(lubridate)
 library(naniar)
+library(leaflet)
 ```
 
 
@@ -41,13 +42,67 @@ vis_miss(sensor_reading_location, warn_large_data = FALSE)
 ```
 
 ```{r}
-
+# Check the errorneous in reading
+sensor_reading_location %>%
+  filter(sensor_id %in% c("0a.EPA-1h.PKIND", "0b.EPA-1h.PKIND")) %>%
+  group_by(sensor_id) %>%
+  count(value)
 ```
 
+The number of error reading is small --> acceptable. We choose 1h and 24h to refer from the EPA guideline of safety and national standard.
+
+```{r}
+# Choose the selected sensor_id
+select_sensor <- c("0a.EPA-1h", "0a.EPA-24h", "0b.EPA-1h", "0b.EPA-24h")
+
+sensor_reading_location <- sensor_reading_location %>%
+  filter(sensor_id %in% select_sensor) %>%
+  select(-last_data,-location, -units) %>%
+  mutate(time = strftime(local_time, format="%H:%M:%S", tz = "AEDT"),
+         day = day(local_time),
+         month = month(local_time, abbr = TRUE),
+         year = year(local_time)) %>%
+  group_by(site_id, year, month) %>%
+  arrange(year, month,day, time)
+```
+
+```{r}
+ggmap::qmplot(longitude, latitude, data = sensor_location, colour = I('red'))
+```
+
+# Daily reading
+
+```{r daily-avg}
+# Daily pm2.5 24 hour average = pm2.5 at the latest of a day. 
+daily_pm_2.5 <- sensor_reading_location %>%
+  filter(sensor_id == "0a.EPA-24h", time == max(time))
+```
+
+```{r daily-avg-10}
+# Daily pm10 24 hour average = pm10 at the latest of a day. 
+daily_pm_10 <- sensor_reading_location %>%
+  filter(sensor_id == "0b.EPA-24h", time == max(time))
+```
+
+# Monthly reading
+
+```{r monthly-avg}
+# Monthly pm2.5 = average of daily pm2.5
+monthly_pm_2.5 <- daily_pm_2.5 %>% ungroup() %>%
+  group_by(site_id, year, month) %>%
+  summarise(value = mean(value))
+```
+
+```{r monthly-avg-10}
+# Monthly pm10 = average of daily pm10
+monthly_pm_10 <- daily_pm_10 %>% ungroup() %>%
+  group_by(site_id, year, month) %>%
+  summarise(value = mean(value))
+```
 
 # To clarify
 
-1. When is the summer bush fire season?  May need to describe the season this time( how is the temperature, the wind frequence, the air pressure)
+1. When is the summer bush fire season?  May need to describe the season this time(how is the temperature, the wind frequence, the air pressure)
 
 - Data is included for roughly a year only --> What possible limitation?
 
@@ -75,9 +130,6 @@ Wind patterns have an impact on air quality because winds move air pollution aro
 Temperature can also affect air quality. In urban areas, air quality is often worse in the winter months. When the air temperature is cooler, exhaust pollutants can be trapped close to the surface beneath a layer of dense, cold air. In summer months, heated air rises and disperses pollutants from the Earth’s surface through the upper troposphere, and increased sunlight results in more harmful ground-level ozone.  
 https://scied.ucar.edu/learning-zone/air-quality/what-is-air-quality
 
-
-
-
 3. What to compare with the air quality in bush fire season - air quality in winter?
 
 - Consider source for monitoring Air Quality index in Melbourne
@@ -88,7 +140,6 @@ https://scied.ucar.edu/learning-zone/air-quality/what-is-air-quality
 1. What is the time stamp we want to use? By hour? by rolling average 24 hours? Barometric pressure is measured every 15 mins
 
 Monthly
-
 
 # Idea
 
