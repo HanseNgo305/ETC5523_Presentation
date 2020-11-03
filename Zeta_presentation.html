@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Presentation Ninja</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Yihui Xie" />
+    <meta name="author" content="Garrick Aden-Buie" />
+    <meta name="date" content="2020-11-02" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+
+
+
+
+
+class: inverse, center, middle
+
+# Presentation for ETC5523
+
+### Presenter: Hanh Ngo
+
+### Presenter: Yuqi Wang
+
+
+
+
+
+---
+class: center, middle
+
+# Questions we explored
+
+--
+
+### Is there evidence to suggest that the air quality in Melbourne decreased during the summer bush fire season?
+
+--
+
+### How does air quality compare now?
+
+---
+class: inverse, center, middle
+
+# Dataset
+
+---
+## Source
+
+- Microclimate Sensor Readings
+
+- Microclimate Sensor Locations
+
+## Variables
+
+- PM2.5: Mass density of particles in the air smaller than 2.5 micrometers in diameter.
+
+- PM10: Mass density of particles in the air smaller than 10 micrometers in diameter.
+
+- PM2.5-EPA-24h: Mass density of particles in the air smaller than 2.5 micrometers in diameter, 24 hour rolling average.
+
+- PM10-EPA-24h: Mass density of particles in the air smaller than 10 micrometers in diameter, 24 hour rolling average.
+
+---
+class: inverse, center, middle
+
+# Findings
+
+---
+
+
+### Data cleaning
+
+
+
+
+```r
+str(sensor_reading)  # Check structure, notice some factor type
+
+sensor_reading &lt;- sensor_reading %&gt;%  # Change from factor to date time
+ mutate(local_time = ymd_hms(local_time),  # Change some factors to character type
+         type = as.character(type),
+         units = as.character(units))
+
+sensor_reading_location &lt;- sensor_reading %&gt;%  # Merge with sensor location
+  left_join(sensor_location, by = "site_id")
+
+pm &lt;- sensor_reading %&gt;%
+  filter(type %in%c("PM2.5", "PM10", "PM2.5-EPA-24h", "PM10-EPA-24h")) %&gt;%  # Choose the sensor type for analyzing
+  mutate(day = as.Date(local_time,"%Y/%m/%d"))         # mutate day
+
+pm &lt;- pm %&gt;%
+  mutate(month = case_when(
+    day&gt;= "2019-11-01" &amp; day&lt; "2019-12-01" ~"2019-11",  # mutate month
+    day&gt;= "2019-12-01" &amp; day&lt; "2020-01-01" ~"2019-12",
+    day&gt;= "2020-01-01" &amp; day&lt; "2020-02-01" ~"2020-01",
+    day&gt;= "2020-02-01" &amp; day&lt; "2020-03-01" ~"2020-02",
+    day&gt;= "2020-03-01" &amp; day&lt; "2020-04-01" ~"2020-03",
+    day&gt;= "2020-04-01" &amp; day&lt; "2020-05-01" ~"2020-04",
+    day&gt;= "2020-05-01" &amp; day&lt; "2020-06-01" ~"2020-05",
+    day&gt;= "2020-06-01" &amp; day&lt; "2020-07-01" ~"2020-06",
+    day&gt;= "2020-07-01" &amp; day&lt; "2020-08-01" ~"2020-07",
+    day&gt;= "2020-08-01" &amp; day&lt; "2020-09-01" ~"2020-08",
+    day&gt;= "2020-09-01" &amp; day&lt; "2020-10-01" ~"2020-09",
+    day&gt;= "2020-10-01" &amp; day&lt; "2020-11-01" ~"2020-10"))
+```
+
+---
+
+### Head the tidy data
+
+
+```r
+knitr::kable(head(pm,5), format = 'html')
+```
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:right;"&gt; id &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; site_id &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; sensor_id &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; value &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; local_time &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; type &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; units &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; day &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; month &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 5 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; arc1045 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0a.EPA-24h &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 5.5 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2019-11-15 09:00:00 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; PM2.5-EPA-24h &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; ug/m^3 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2019-11-15 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2019-11 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 10 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; arc1045 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0b.EPA-24h &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 22.9 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2019-11-15 09:00:00 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; PM10-EPA-24h &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; ug/m^3 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2019-11-15 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2019-11 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 17 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; arc1046 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0a.EPA-24h &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4.4 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2019-11-15 09:00:00 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; PM2.5-EPA-24h &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; ug/m^3 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2019-11-15 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2019-11 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 22 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; arc1046 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0b.EPA-24h &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20.1 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2019-11-15 09:00:00 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; PM10-EPA-24h &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; ug/m^3 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2019-11-15 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2019-11 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 29 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; arc1047 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0a.EPA-24h &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4.2 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2019-11-15 09:00:00 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; PM2.5-EPA-24h &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; ug/m^3 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2019-11-15 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2019-11 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+---
+
+### The air quality from 2019-11-15 to 2020-10-26
+
+![](Zeta_presentation_files/figure-html/barplot-1.png)&lt;!-- --&gt;
+
+
+---
+### The air quality from 2019-11-15 to 2020-10-26
+
+![](Zeta_presentation_files/figure-html/unnamed-chunk-3-1.png)&lt;!-- --&gt;
+
+---
+
+### Comparing the air quality in January 2020 with October 2020
+
+![](Zeta_presentation_files/figure-html/unnamed-chunk-4-1.png)&lt;!-- --&gt;
+
+---
+
+### Comparing the air quality in January 2020 with October 2020
+
+![](Zeta_presentation_files/figure-html/unnamed-chunk-5-1.png)&lt;!-- --&gt;
+
+---
+
+### Comparing the air quality in January 2020 with October 2020
+
+![](Zeta_presentation_files/figure-html/unnamed-chunk-6-1.png)&lt;!-- --&gt;
+
+---
+
+class: inverse, center, middle
+
+# Conclusions
+
+
+---
+
+class: center, middle
+
+# Thanks!
+
+Slides created via the R package [**xaringan**](https://github.com/yihui/xaringan).
+
+The chakra comes from [remark.js](https://remarkjs.com), [**knitr**](http://yihui.name/knitr), and [R Markdown](https://rmarkdown.rstudio.com).
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

@@ -1,0 +1,250 @@
+---
+title: "Presentation Ninja"
+subtitle: "&#x2694;&#xFE0F; xaringan +<br/>&#x1F60E; xaringanthemer"  
+author: 
+  - "Yihui Xie"
+  - "Garrick Aden-Buie"
+date: '`r Sys.Date()`'
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: xaringan-themer.css
+    seal: false
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(fig.height = 8, fig.width=12)
+```
+
+```{r xaringan-themer, include=FALSE, warning=FALSE}
+library(xaringanthemer)
+style_duo_accent(
+  primary_color = "#1381B0",
+  secondary_color = "#FF961C",
+  inverse_header_color = "#FFFFFF"
+)
+```
+
+class: inverse, center, middle
+
+# Presentation for ETC5523
+
+### Presenter: Hanh Ngo
+
+### Presenter: Yuqi Wang
+
+
+
+
+
+---
+class: center, middle
+
+# Questions we explored
+
+--
+
+### Is there evidence to suggest that the air quality in Melbourne decreased during the summer bush fire season?
+
+--
+
+### How does air quality compare now?
+
+---
+class: inverse, center, middle
+
+# Dataset
+
+---
+## Source
+
+- Microclimate Sensor Readings
+
+- Microclimate Sensor Locations
+
+## Variables
+
+- PM2.5: Mass density of particles in the air smaller than 2.5 micrometers in diameter.
+
+- PM10: Mass density of particles in the air smaller than 10 micrometers in diameter.
+
+- PM2.5-EPA-24h: Mass density of particles in the air smaller than 2.5 micrometers in diameter, 24 hour rolling average.
+
+- PM10-EPA-24h: Mass density of particles in the air smaller than 10 micrometers in diameter, 24 hour rolling average.
+
+---
+class: inverse, center, middle
+
+# Findings
+
+---
+
+
+### Data cleaning
+
+```{r data, message=FALSE,warning=FALSE,include=FALSE}
+library(dplyr)
+library(lubridate)
+library(naniar)
+library(ggplot2)
+library(plotly)
+library(ggridges)
+library(viridis)
+library(hrbrthemes)
+sensor_location <- read.csv(here::here("data", "Microclimate_Sensor_Locations.csv"))
+sensor_reading <- read.csv(here::here("data", "Microclimate_Sensor_Readings.csv"))
+
+```
+
+```{r message=FALSE,warning=FALSE, echo=TRUE, results='hide'}
+str(sensor_reading)  # Check structure, notice some factor type
+
+sensor_reading <- sensor_reading %>%  # Change from factor to date time
+ mutate(local_time = ymd_hms(local_time),  # Change some factors to character type
+         type = as.character(type),
+         units = as.character(units))
+
+sensor_reading_location <- sensor_reading %>%  # Merge with sensor location
+  left_join(sensor_location, by = "site_id")
+
+pm <- sensor_reading %>%
+  filter(type %in%c("PM2.5", "PM10", "PM2.5-EPA-24h", "PM10-EPA-24h")) %>%  # Choose the sensor type for analyzing
+  mutate(day = as.Date(local_time,"%Y/%m/%d"))         # mutate day
+
+pm <- pm %>%
+  mutate(month = case_when(
+    day>= "2019-11-01" & day< "2019-12-01" ~"2019-11",  # mutate month
+    day>= "2019-12-01" & day< "2020-01-01" ~"2019-12",
+    day>= "2020-01-01" & day< "2020-02-01" ~"2020-01",
+    day>= "2020-02-01" & day< "2020-03-01" ~"2020-02",
+    day>= "2020-03-01" & day< "2020-04-01" ~"2020-03",
+    day>= "2020-04-01" & day< "2020-05-01" ~"2020-04",
+    day>= "2020-05-01" & day< "2020-06-01" ~"2020-05",
+    day>= "2020-06-01" & day< "2020-07-01" ~"2020-06",
+    day>= "2020-07-01" & day< "2020-08-01" ~"2020-07",
+    day>= "2020-08-01" & day< "2020-09-01" ~"2020-08",
+    day>= "2020-09-01" & day< "2020-10-01" ~"2020-09",
+    day>= "2020-10-01" & day< "2020-11-01" ~"2020-10"))
+```
+
+---
+
+### Head the tidy data
+
+```{r }
+knitr::kable(head(pm,5), format = 'html')
+```
+
+---
+
+### The air quality from 2019-11-15 to 2020-10-26
+
+```{r barplot, message=FALSE, warning=FALSE, echo=FALSE}
+
+pm_4 <- pm %>%
+  filter(type %in%c("PM2.5", "PM10", "PM2.5-EPA-24h", "PM10-EPA-24h")) %>%
+  select("value", "type", "month") %>%
+  group_by(month, type) %>%
+  mutate(VALUE = mean(value)) 
+g4 <- ggplot(pm_4, aes(month, VALUE, fill= type)) +
+  geom_bar(stat = "identity", 
+position = "dodge") + 
+  xlab("Month") +
+theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+g4
+```
+
+
+---
+### The air quality from 2019-11-15 to 2020-10-26
+
+```{r message=FALSE,warning=FALSE,echo=FALSE}
+pm_6 <- pm %>%
+  filter(type %in%c("PM2.5-EPA-24h", "PM10-EPA-24h")) %>%
+  select("value", "type", "month") %>%
+  group_by(month, type)
+g5 <-ggplot(pm_6, aes(x=month, y=value, fill=type)) + 
+    geom_boxplot() +
+    facet_wrap(~type, nrow = 2, scales = "free_y") +
+theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+g5
+```
+
+---
+
+### Comparing the air quality in January 2020 with October 2020
+
+```{r message=FALSE,warning=FALSE,echo=FALSE}
+g6 <- ggplot(pm_6, aes(x=month, y=value, fill=type)) + 
+    geom_boxplot() +
+    facet_wrap(~type, nrow = 2) +
+    ylim(0,100) +
+theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
+g6
+```
+
+---
+
+### Comparing the air quality in January 2020 with October 2020
+
+```{r message=FALSE,warning=FALSE,echo=FALSE}
+pm_2 <- pm %>%
+  select("value", "type", "day", "local_time") %>%
+  filter(type %in%c("PM2.5-EPA-24h", "PM10-EPA-24h")) %>%
+  filter(day >= "2019-12-01",
+         day < "2020-03-01") %>%
+  group_by(day, type) 
+g2 <- ggplot(pm_2, aes(local_time, value, color= type)) +
+  geom_line()
+pm_3 <- pm %>%
+  select("value", "type", "day", "local_time") %>%
+  filter(type %in%c("PM2.5-EPA-24h", "PM10-EPA-24h")) %>%
+  filter(day >= "2020-10-01",
+         day < "2020-11-01") %>%
+  group_by(day, type) 
+g3 <- ggplot(pm_3, aes(local_time, value, color= type)) +
+  geom_line()
+gridExtra::grid.arrange(g2,g3,nrow=2)
+```
+
+---
+
+### Comparing the air quality in January 2020 with October 2020
+
+```{r message=FALSE,warning=FALSE,echo=FALSE}
+pm_5 <- pm %>%
+  filter(type %in%c("PM10-EPA-24h")) %>%
+  select("value", "type", "month") %>%
+  group_by(month, type) 
+
+# Plot
+ggplot(pm_5, aes(x = value, y = month, fill = ..x..)) +
+  geom_density_ridges_gradient(scale = 3, rel_min_height = 0.01 ) +
+  xlim(15,70) +
+  scale_fill_viridis(name = "Mean PM10 [μg/m3]", option = "C") +
+  labs(title = 'PM10 in Melbourne') +
+  theme_ipsum() 
+
+```
+
+---
+
+class: inverse, center, middle
+
+# Conclusions
+
+
+---
+
+class: center, middle
+
+# Thanks!
+
+Slides created via the R package [**xaringan**](https://github.com/yihui/xaringan).
+
+The chakra comes from [remark.js](https://remarkjs.com), [**knitr**](http://yihui.name/knitr), and [R Markdown](https://rmarkdown.rstudio.com).

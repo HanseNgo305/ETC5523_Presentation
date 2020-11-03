@@ -1,0 +1,16 @@
+/* for background image in title slide */
+.title-slide {
+  background-image: url("images/melb-landscape.jpg");
+  background-size: cover;
+}
+
+.title-slide h1 {
+  color: #FFFFFF;
+  text-align: left
+}
+.title-slide h2, .title-slide h3 {
+  color: #FFFFFF; 
+  line-height: 1.5em;
+  text-align: left
+}
+

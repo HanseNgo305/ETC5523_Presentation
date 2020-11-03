@@ -11,14 +11,42 @@ library(dplyr)
 library(lubridate)
 library(naniar)
 library(leaflet)
+library(ggplot2)
 ```
 
+# Hello
 
-# First skim
+
+# What we talk about
+
+(In this presentation, we will try to answer the question)
+Is there evidence to suggest that the air quality in Melbourne decreased during the summer bushfire season?
+How does air quality compare now?
+
+(subtitle)
+Using the date obtained from 5 climate sensors in Melbourne City Council
+
+
+# The data
+## Quick look
+
+## Explaination of used var
+
+Air quality is measured in.... (source to EPA)
+In this dataset, we will be utilizing only 2 variables:.... These two are erroneous, but with low quantity
+
+We want to look by month and maybe Day (if needed). 
+
+
+# First skim (not bring to slide)
 
 ```{r read-data}
 sensor_location <- read.csv(here::here("data", "Microclimate_Sensor_Locations.csv"))
 sensor_reading <- read.csv(here::here("data", "Microclimate_Sensor_Readings.csv"))
+fire_archive <- read.csv(here::here("data", "fire_archive_V1_101674.csv")) %>%
+  select(latitude, longitude, acq_date, frp)
+fire_nrt <- read.csv(here::here("data", "fire_nrt_V1_101674.csv")) %>%
+  select(latitude, longitude, acq_date, frp)
 ```
 
 ```{r clean-up}
@@ -27,7 +55,7 @@ str(sensor_reading)
 
 sensor_reading <- sensor_reading %>%
   # Change from factor to date time
-  mutate(local_time = ymd_hms(local_time),
+  mutate(local_time = ymd_hms(local_time, tz = "UTC"),
   # Change some factors to character type
          type = as.character(type),
          units = as.character(units))
@@ -35,6 +63,13 @@ sensor_reading <- sensor_reading %>%
 # Merge with sensor location
 sensor_reading_location <- sensor_reading %>%
   left_join(sensor_location, by = "site_id")
+
+# fire location merged
+fire_location <- rbind(fire_archive, fire_nrt)
+# reformat and choose days that matched with sensor data
+fire_location <- fire_location %>%
+  mutate(acq_date = ymd(acq_date)) %>%
+  filter(acq_date > "2019-11-14")
 ```
 
 ```{r missing-check}
@@ -57,48 +92,223 @@ select_sensor <- c("0a.EPA-1h", "0a.EPA-24h", "0b.EPA-1h", "0b.EPA-24h")
 
 sensor_reading_location <- sensor_reading_location %>%
   filter(sensor_id %in% select_sensor) %>%
-  select(-last_data,-location, -units) %>%
-  mutate(time = strftime(local_time, format="%H:%M:%S", tz = "AEDT"),
+  #select(-last_data,-location, -units, -description) %>%
+  mutate(time = strftime(local_time, format="%H:%M:%S", tz = "UTC"),
          day = day(local_time),
          month = month(local_time, abbr = TRUE),
          year = year(local_time)) %>%
   group_by(site_id, year, month) %>%
-  arrange(year, month,day, time)
+  arrange(local_time)
 ```
 
 ```{r}
 ggmap::qmplot(longitude, latitude, data = sensor_location, colour = I('red'))
 ```
 
-# Daily reading
+# Daily reading of PM2.5 and PM10
+
+Since pm2.5 is more dangerous, we will look at this first
 
 ```{r daily-avg}
 # Daily pm2.5 24 hour average = pm2.5 at the latest of a day. 
 daily_pm_2.5 <- sensor_reading_location %>%
-  filter(sensor_id == "0a.EPA-24h", time == max(time))
+  filter(sensor_id == "0a.EPA-24h") %>%
+  #mutate(air_quality_2.5 = case_when(
+  #  value < 8 ~ "Good",
+  #  value >=8 & value < 25 ~ "Moderate",
+  #  value >=25 & value < 40 ~ "Poor",
+  #  value >=40 & value < 177 ~ "Very Poor",
+  #  TRUE ~ "Hazardous")) %>%
+  filter(time == max(time))
 ```
+
+## plotting
+
+```{r daily-pm2.5-plot}
+# obtain daily average regardless of site_id
+daily_avg_pm_2.5 <- daily_pm_2.5 %>%
+  group_by(local_time) %>%
+  summarise_at(vars(value), funs(mean(., na.rm=TRUE))) %>%
+  mutate(air_quality_2.5 = case_when(
+    value < 8 ~ "Good",
+    value >=8 & value < 25 ~ "Moderate",
+    value >=25 & value < 40 ~ "Poor",
+    value >=40 & value < 177 ~ "Very Poor",
+    TRUE ~ "Hazardous"))
+
+# create colour palette
+quality_colour <- tibble(
+  air_quality_2.5 = c("Good", "Moderate", "Poor", "Very Poor", "Hazardous"),
+  Color = c("green", "yellow", "orange", "red", "brown"))
+
+# assign colour to each quality
+daily_avg_pm_2.5$air_quality_2.5 <- factor(daily_avg_pm_2.5$air_quality_2.5, levels = quality_colour$air_quality_2.5)
+
+# plot
+daily_avg_pm_2.5 %>%
+  ggplot(aes(x = local_time, y = value, fill = air_quality_2.5)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = quality_colour$Color) +
+  # facet_wrap(~site_id) +
+  theme_minimal() +
+  scale_x_datetime(date_breaks = "1 month", date_labels = "%b-%Y") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
+  ggtitle("Daily air quality identified by PM2.5") +
+  xlab("Day")
+```
+
+## count the number of good day and bad day
+```{r AQ-count-2.5}
+day_count_2.5 <- daily_avg_pm_2.5 %>%
+  mutate(day = day(local_time),
+         month = month(local_time, abbr = TRUE),
+         year = year(local_time)) %>%
+  group_by(year, month) %>%
+  count(air_quality_2.5)
+```
+
+```{r day-count-2.5}
+day_count_2.5 %>%
+  ggplot(aes(x =))
+```
+
+
+# Monthly reading of pm2.5
+
+```{r monthly-avg}
+# Monthly pm2.5 = average of daily pm2.5
+monthly_pm_2.5 <- daily_avg_pm_2.5 %>%
+  mutate(
+         month = month(local_time, abbr = TRUE),
+         year = year(local_time)) %>%
+  group_by(year, month) %>%
+  summarise(value = mean(value)) %>%
+  mutate(month_yr = paste0(month,"/",year)) %>%
+  arrange(year,month)
+
+monthly_pm_2.5
+```
+
+# Daily reading of pm10
 
 ```{r daily-avg-10}
 # Daily pm10 24 hour average = pm10 at the latest of a day. 
 daily_pm_10 <- sensor_reading_location %>%
-  filter(sensor_id == "0b.EPA-24h", time == max(time))
+  filter(sensor_id == "0b.EPA-24h") %>%
+  mutate(air_quality = case_when(
+    value < 50 ~ "Good",
+    TRUE ~ "Warning")) %>%
+  filter(time == max(time))
+
+daily_pm_10 
 ```
 
-# Monthly reading
+```{r daily-pm10-plot}
+# obtain daily average regardless of site_id
+daily_avg_pm_10 <- daily_pm_10 %>%
+  group_by(local_time) %>%
+  summarise_at(vars(value), funs(mean(., na.rm=TRUE))) %>%
+  mutate(air_quality_10 = case_when(
+    value < 50 ~ "Good",
+    TRUE ~ "Warning"))
 
-```{r monthly-avg}
-# Monthly pm2.5 = average of daily pm2.5
-monthly_pm_2.5 <- daily_pm_2.5 %>% ungroup() %>%
-  group_by(site_id, year, month) %>%
-  summarise(value = mean(value))
+# create colour palette
+quality_colour_pm10 <- tibble(
+  air_quality = c("Good", "Warning"),
+  Color = c("green", "orange"))
+
+# assign colour to each quality
+daily_avg_pm_10$air_quality_10 <- factor(daily_avg_pm_10$air_quality_10, levels = quality_colour_pm10$air_quality)
+
+# plot
+daily_avg_pm_10 %>%
+  ggplot(aes(x = local_time, y = value, fill = air_quality_10)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = quality_colour_pm10$Color) +
+  theme_minimal() +
+  scale_x_datetime(date_breaks = "1 month", date_labels = "%b-%Y") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
+  ggtitle("Daily air quality identified by PM10") +
+  xlab("Day")
 ```
+
+# monthly reading of PM10
 
 ```{r monthly-avg-10}
 # Monthly pm10 = average of daily pm10
 monthly_pm_10 <- daily_pm_10 %>% ungroup() %>%
-  group_by(site_id, year, month) %>%
+  mutate(month_yr = strftime(local_time, format="%b-%y")) %>%
+  group_by(year, month, month_yr) %>%
   summarise(value = mean(value))
+
+monthly_pm_10 
 ```
+
+# Put together with monthly bush fire occurence?
+
+```{r count-location, eval = FALSE}
+# Try to pick only fire occurred near Melbourne
+geo <- fire_location %>%
+  select(latitude, longitude) %>%
+  arrange(desc(latitude)) %>%
+  # roughly estimate
+  filter(latitude < -37.7 & latitude > -38,
+         longitude < 145.2 & longitude > 144.8) %>%
+  mutate(location = paste0(latitude," - ",longitude))
+
+distinct(geo, location, .keep_all = TRUE) # 17 disctinct location -> too little?
+```
+
+```{r fire-locate}
+day_frp <- fire_location %>% 
+  group_by(acq_date) %>%
+  summarise_at(vars(frp), funs(sum(., na.rm=TRUE))) %>%
+  arrange(acq_date)
+```
+
+```{r combined-plot}
+# plot pm2.5
+p1 <- daily_avg_pm_2.5 %>%
+  filter(local_time < "2020-01-31") %>%
+  ggplot(aes(x = local_time, y = value, fill = air_quality_2.5)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = quality_colour$Color) +
+  theme_minimal() +
+  theme(axis.ticks.x = element_blank(),
+        axis.text.x = element_blank()) +
+  guides(fill = guide_legend(reverse=TRUE)) +
+  ggtitle("Daily air quality determined by PM2.5") +
+  xlab("")
+
+# plot pm10
+p2 <- daily_avg_pm_10 %>%
+  filter(local_time < "2020-01-31") %>%
+  ggplot(aes(x = local_time, y = value, fill = air_quality_10)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = quality_colour_pm10$Color) +
+  guides(fill = guide_legend(reverse=TRUE)) +
+  theme_minimal() +
+  theme(axis.ticks.x = element_blank(),
+        axis.text.x = element_blank()) +
+  ggtitle("Daily air quality identified by PM10") +
+  xlab("")
+
+# plot frp
+p3 <- day_frp %>%
+  ggplot(aes(x = acq_date, y = frp, fill = "red")) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  scale_x_date(date_breaks = "5 day", date_labels = "%b-%d-%Y") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5),
+        legend.position = "none") +
+  ggtitle("Daily fire radiation power (frp)") +
+  xlab("")
+
+library(patchwork)
+p1/p2/p3+plot_layout(guides = "collect")
+```
+
+
 
 # To clarify
 
