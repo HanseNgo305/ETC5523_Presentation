@@ -181,6 +181,8 @@ knitr::kable(head(fire_location,5), format = 'html')
 > EPA monitors the quality of air in Victoria. We do this by measuring the air for pollutants that can affect human health. We measure for several common pollutants such as particles (PM2.5 and PM10), ozone and nitrogen dioxide. 
 _(EPA Victoria)_
 
+--
+
 .pull-left[
 ```{r read-type, echo = FALSE}
 type_metadata %>%
@@ -208,14 +210,11 @@ check_error <- test1 %>%
 
 .pull-right[
 - There is a total of `r nrow(test1)` observations for the two types: `0a.EPA-1h.PKIND` and `0b.EPA-1h.PKIND`.
-- We only have 7 readings that had low confidence in reading (14 for both types) as below:
-
-.left[
+- Only 7 observations had low confidence in reading (14 for both types):
 ```{r check-error, echo = FALSE, message=FALSE, warning = FALSE, fig.align="left"}
 knitr::kable(check_error,format = 'html') %>%
   kable_styling(font_size = 8)
 ```
-]
 - The erroneous readings were minimal -> We are happy with using the full set.
 ]
 
@@ -266,6 +265,8 @@ sensor_reading_location %>%
 
 ]
 ]]
+
+--
 
 .pull-right[
 **Note**
@@ -497,6 +498,7 @@ daily_avg_pm_2.5 %>%
 - Most of the days are in good condition, now that the bush fire has been controlled!
 ]
 ---
+class: center, middle
 # Final takeaway
 #### The bush fire seemed to have a negative influence over the air quality in Melbourne. 
 
@@ -504,7 +506,7 @@ daily_avg_pm_2.5 %>%
 
 #### The smoke from the fire had caused the level of PM2.5 and PM10 increased in the air, making the air quality dropped.
 
----
+--
 
 #### Now the air quality is all greeny good! 
 
