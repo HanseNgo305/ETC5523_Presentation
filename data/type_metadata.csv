@@ -1,0 +1,15 @@
+﻿Sensor_id ,Type ,Value Min ,Value Max ,Sensor Description ,Units 
+0a ,PM2.5 ,0.0 ,999.9 ,Mass density of particles in the air smaller than 2.5 micrometers in diameter ,μg/m3 
+0b ,PM10 ,0.0 ,1999.9 ,Mass density of particles in the air smaller than 10 micrometers in diameter ,μg/m3 
+0a.EPA-1h ,PM2.5-EPA-1h ,0.0 ,999.9 ,"Mass density of particles in the air smaller than 2.5 micrometers in diameter, 1 hour averaged. ",μg/m3 
+0a.EPA-24h ,PM2.5-EPA-24h ,0.0 ,999.9 ,"Mass density of particles in the air smaller than 2.5 micrometers in diameter, 24 hour rolling average ",μg/m3 
+0b.EPA-1h ,PM10-EPA-1h ,0.0 ,1999.9 ,"Mass density of particles in the air smaller than 10 micrometers in diameter, 1 hour averaged ",μg/m3 
+0b.EPA-24h ,PM10-EPA-24h ,0.0 ,1999.9 ,"Mass density of particles in the air smaller than 10 micrometers in diameter, 24 hour rolling average ",μg/m3 
+0a.EPA-1h.PKIND ,PM2.5-EPA-1h- PKIND ,,,"Indicates for type PM2.5-EPA-1h, that one of the readings in this hour was erroneous (0 = erroneous, 1 = good).  
+Used to flag where confidence in reading is low, based on moisture in the air can sometimes case the reading to erroneously go high.",0/1 
+0a.EPA-1h.NOPK ,PM2.5-EPA-1h- NOPK ,0.0 ,999.9 ,Same as type PM2.5-EPA-1h but it ignores the erroneous readings. ,μg/m3 
+0a.EPA- 1h.NOPK.EPA-24h ,PM2.5-EPA-1h- NOPK-EPA-24h ,0.0 ,999.9 ,Indicates PM2.5 data is 24 hour rolling average of the 1 hour data that excludes erroneous data. ,μg/m3 
+0b.EPA-1h.PKIND ,PM10-EPA-1h- PKIND ,,,"Indicates for type PM10-EPA-1h, that one of the readings in this hour was erroneous (0 = erroneous, 1 = good).  
+Used to flag where confidence in reading is low, based on moisture in the air can sometimes case the reading to erroneously go high.",0/1 
+0b. EPA-1h.NOPK ,10-EPA-1h- NOPK ,0.0 ,1999.9 ,Same as type PM10-EPA-1h but it ignores the erroneous readings. ,μg/m3 
+0b.EPA- 1h.NOPK.EPA-24h ,PM10-EPA-1h- NOPK-EPA-24h ,0.0 ,1999.9 ,Indicates PM10 data is 24 hour rolling average of the 1 hour data that excludes erroneous data. ,μg/m3 

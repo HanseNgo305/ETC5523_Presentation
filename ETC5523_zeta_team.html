@@ -4,9 +4,11 @@
     <title>A day in Melbourne</title>
     <meta charset="utf-8" />
     <meta name="author" content=" Hanh Ngo  Yuqi Wang" />
-    <meta name="date" content="2020-11-03" />
+    <meta name="date" content="2020-11-04" />
     <link href="libs/panelset/panelset.css" rel="stylesheet" />
     <script src="libs/panelset/panelset.js"></script>
+    <script src="libs/kePrint/kePrint.js"></script>
+    <link href="libs/lightable/lightable.css" rel="stylesheet" />
     <script src="libs/htmlwidgets/htmlwidgets.js"></script>
     <script src="libs/jquery/jquery.min.js"></script>
     <link href="libs/leaflet/leaflet.css" rel="stylesheet" />
@@ -26,7 +28,7 @@ class: center, middle, inverse, title-slide
 # A day in Melbourne
 ## ETC5523<br/>Presentation
 ### <br/>Hanh Ngo <br/>Yuqi Wang
-### 2020-11-03
+### 2020-11-04
 
 ---
 
@@ -36,13 +38,6 @@ class: center, middle, inverse, title-slide
 
 
 &lt;style type="text/css"&gt;
-.remark-code {
-  font-size:24px;
-}
-.tiny .remark-code {
-  font-size: 50%;
-}
-
 table-head {
   font-size: 10px;     
 }
@@ -83,8 +78,8 @@ class: center, middle
 class: center, middle
 
 # When is the bush fire season?
-#### The **"Australian Bush Fire season"** started in Victoria from 21 November 2019. All significant fires in Victoria were declared contained on 27 February 2020. &lt;/sub&gt; 1 &lt;/sub&gt;
-#### By 31 March 2020, the bush fire season is considered ended &lt;/sub&gt; 2 &lt;/sub&gt;
+#### The **"Australian Bush Fire season"** started in Victoria from 21 November 2019. All significant fires in Victoria were declared contained on 27 February 2020. &lt;sup&gt; 1 &lt;/sup&gt;
+#### By 31 March 2020, the bush fire season is considered ended &lt;sup&gt; 2 &lt;/sup&gt;
 
 .footnote[
 [1] Source: https://en.wikipedia.org/wiki/2019%E2%80%9320_Australian_bushfire_season#Victoria  
@@ -100,7 +95,7 @@ class: center, middle
 ---
 class:table-head
 
-## Dataset employed
+## Dataset used
 
 
 
@@ -112,60 +107,34 @@ class:table-head
 &lt;table&gt;
  &lt;thead&gt;
   &lt;tr&gt;
-   &lt;th style="text-align:right;"&gt; id &lt;/th&gt;
-   &lt;th style="text-align:left;"&gt; site_id &lt;/th&gt;
-   &lt;th style="text-align:left;"&gt; sensor_id &lt;/th&gt;
-   &lt;th style="text-align:right;"&gt; value &lt;/th&gt;
-   &lt;th style="text-align:left;"&gt; local_time &lt;/th&gt;
-   &lt;th style="text-align:left;"&gt; type &lt;/th&gt;
-   &lt;th style="text-align:left;"&gt; units &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Variable &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Description &lt;/th&gt;
   &lt;/tr&gt;
  &lt;/thead&gt;
 &lt;tbody&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; arc1045 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 0a.EPA-1h &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 3.9 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 2019-11-15 09:00:00 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; PM2.5-EPA-1h &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; ug/m^3 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; id &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Unique id for each record in the dataset &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:right;"&gt; 2 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; arc1045 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 0a.EPA-1h.NOPK &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 3.9 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 2019-11-15 09:00:00 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; PM2.5-EPA-1h-NOPK &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; ug/m^3 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; site_id &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Location id &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:right;"&gt; 3 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; arc1045 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 0a.EPA-1h.NOPK.EPA-24h &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 5.5 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 2019-11-15 09:00:00 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; PM2.5-EPA-1h-NOPK-EPA-24h &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; ug/m^3 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; sensor_id &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Sensor id &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:right;"&gt; 4 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; arc1045 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 0a.EPA-1h.PKIND &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 1.0 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 2019-11-15 09:00:00 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; PM2.5-EPA-1h-PKIND &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 0/1 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; value &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Value of reading &lt;/td&gt;
   &lt;/tr&gt;
   &lt;tr&gt;
-   &lt;td style="text-align:right;"&gt; 5 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; arc1045 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 0a.EPA-24h &lt;/td&gt;
-   &lt;td style="text-align:right;"&gt; 5.5 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; 2019-11-15 09:00:00 &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; PM2.5-EPA-24h &lt;/td&gt;
-   &lt;td style="text-align:left;"&gt; ug/m^3 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; local_time &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Local date and time &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; type &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Type of sensor &lt;/td&gt;
   &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
@@ -271,30 +240,195 @@ class:table-head
 - Data provided from sensor reading runs from 2019-11-15 to 2020-10-26
 - Data provided from NASA fire satellite runs from 2019-11-15 to 2020-01-30
 ]
-
 ---
-## Variables
-
+## What types to use?
 &gt; EPA monitors the quality of air in Victoria. We do this by measuring the air for pollutants that can affect human health. We measure for several common pollutants such as particles (PM2.5 and PM10), ozone and nitrogen dioxide. 
 _(EPA Victoria)_
 
+.pull-left[
+&lt;table class="table" style="font-size: 7px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; Sensor_id. &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Value.Min. &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Value.Max. &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Sensor.Description. &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Units. &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; 0a &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 999.9 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Mass density of particles in the air smaller than 2.5 micrometers in diameter &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; μg/m3 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; 0b &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1999.9 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Mass density of particles in the air smaller than 10 micrometers in diameter &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; μg/m3 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; 0a.EPA-1h &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 999.9 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Mass density of particles in the air smaller than 2.5 micrometers in diameter, 1 hour averaged. &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; μg/m3 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;background-color: yellow !important;"&gt; 0a.EPA-24h &lt;/td&gt;
+   &lt;td style="text-align:right;background-color: yellow !important;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;background-color: yellow !important;"&gt; 999.9 &lt;/td&gt;
+   &lt;td style="text-align:left;background-color: yellow !important;"&gt; Mass density of particles in the air smaller than 2.5 micrometers in diameter, 24 hour rolling average &lt;/td&gt;
+   &lt;td style="text-align:left;background-color: yellow !important;"&gt; μg/m3 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; 0b.EPA-1h &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1999.9 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Mass density of particles in the air smaller than 10 micrometers in diameter, 1 hour averaged &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; μg/m3 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;background-color: yellow !important;"&gt; 0b.EPA-24h &lt;/td&gt;
+   &lt;td style="text-align:right;background-color: yellow !important;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;background-color: yellow !important;"&gt; 1999.9 &lt;/td&gt;
+   &lt;td style="text-align:left;background-color: yellow !important;"&gt; Mass density of particles in the air smaller than 10 micrometers in diameter, 24 hour rolling average &lt;/td&gt;
+   &lt;td style="text-align:left;background-color: yellow !important;"&gt; μg/m3 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; 0a.EPA-1h.PKIND &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; NA &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; NA &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Indicates for type PM2.5-EPA-1h, that one of the readings in this hour was erroneous (0 = erroneous, 1 = good).  
+Used to flag where confidence in reading is low, based on moisture in the air can sometimes case the reading to erroneously go high. &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0/1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; 0a.EPA-1h.NOPK &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 999.9 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Same as type PM2.5-EPA-1h but it ignores the erroneous readings. &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; μg/m3 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; 0a.EPA- 1h.NOPK.EPA-24h &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 999.9 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Indicates PM2.5 data is 24 hour rolling average of the 1 hour data that excludes erroneous data. &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; μg/m3 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; 0b.EPA-1h.PKIND &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; NA &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; NA &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Indicates for type PM10-EPA-1h, that one of the readings in this hour was erroneous (0 = erroneous, 1 = good).  
+Used to flag where confidence in reading is low, based on moisture in the air can sometimes case the reading to erroneously go high. &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 0/1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; 0b. EPA-1h.NOPK &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1999.9 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Same as type PM10-EPA-1h but it ignores the erroneous readings. &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; μg/m3 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; 0b.EPA- 1h.NOPK.EPA-24h &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1999.9 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; Indicates PM10 data is 24 hour rolling average of the 1 hour data that excludes erroneous data. &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; μg/m3 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+
 --
 
-### So we chose...
-- PM2.5: Mass density of particles in the air smaller than 2.5 micrometers in diameter.  
 
---
+.pull-right[
+- There is a total of 67090 observations for the two types: `0a.EPA-1h.PKIND` and `0b.EPA-1h.PKIND`.
+- We only have 7 readings that had low confidence in reading (14 for both types) as below:
 
-- PM10: Mass density of particles in the air smaller than 10 micrometers in diameter.  
+.left[
+&lt;table class="table" style="font-size: 8px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; local_time &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; value &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; count &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; 2020-01-06 18:00:00 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; 2020-07-11 22:00:00 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; 2020-07-12 00:00:00 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; 2020-07-12 01:00:00 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; 2020-07-12 02:00:00 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; 2020-07-26 04:00:00 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; 2020-07-26 05:00:00 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 2 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+]
+- The erroneous readings were minimal -&gt; We are happy with using the full set.
+]
 
---
+---
+## Can we trust the data?
 
-- PM2.5-EPA-24h: Mass density of particles in the air smaller than 2.5 micrometers in diameter, 24 hour rolling average.  
 
---
+.pull-left[
+.panelset[
+.panel[.panel-name[vismiss]
+&lt;img src="ETC5523_zeta_team_files/figure-html/missing-check-1.png" width="504" /&gt;
+]
+.panel[.panel-name[daycheck]
+&lt;img src="ETC5523_zeta_team_files/figure-html/check-missing-1.png" width="504" /&gt;
 
-- PM10-EPA-24h: Mass density of particles in the air smaller than 10 micrometers in diameter, 24 hour rolling average.
+]
+]]
 
+.pull-right[
+**Note**
+
+- Using vismiss is not enough to identify the missing values.
+- We visualise the reading for all of the days in the dataset for each sensor 
+  - Not all sensors have full data recorded.
+  - In **24th January 2020**, there is no data recorded for all of the sensors.
+- The overall pattern of all the sensors appreared similar -&gt; average all sensors to account for daily reading.
+]
 ---
 class: center, middle
 
@@ -304,8 +438,6 @@ class: center, middle
 ## Daily level of PM 2.5
 
 .pull-left[
-
-
 
 
 &lt;img src="ETC5523_zeta_team_files/figure-html/daily-pm2.5-plot-1.png" width="504" /&gt;
@@ -318,9 +450,9 @@ class: center, middle
 ]
 .panel[.panel-name[Findings]
 - In most of the days, Melbourne has good air quality.  
-- 
+- From mid-December 2019 to early Feb 2020, air quality dropped drastically with January being the worst month. Only half the days having the "Good" and "Moderate" air quality, the rest were "Poor" and "Very poor" with 1 "Hazardous" day.
 
-
+- One day in July had "poor" quality.
 ]
 ]]
 ---
@@ -344,13 +476,14 @@ class: center, middle
 ]
 
 .panel[.panel-name[Findings]
-- xxx
+- Similar to PM 2.5, the PM10 had the same period where the air quality wasdropped terribly.
+- January again had some days that the air quality was terrible with an exeptionally high level of PM10.
 
 
 ]
 ]]
 ---
-## What about fire occurence?
+## What about fire occurrence?
 
 
 
@@ -360,6 +493,14 @@ class: center, middle
 
 &lt;img src="images/combined-plot.png" width="1000" height="530"&gt;
 ---
+## A lag in days
+
+&lt;iframe src="https://www.nbcnews.com/science/environment/scientists-find-australian-wildfire-smoke-has-circled-globe-n1116511" width="100%" height="400px"&gt;&lt;/iframe&gt;
+
+Source: [NBC News Digital](https://www.nbcnews.com/science/environment/scientists-find-australian-wildfire-smoke-has-circled-globe-n1116511)
+
+
+---
 ## How is the current air quality?
 
 .pull-left[
@@ -367,19 +508,31 @@ class: center, middle
 ]
 
 .pull-right[
-- Now is the October - 2020  
-- We only see PM2.5. If the PM2.5 is within acceptable level, so is PM10.
+- Now is latest month in the dataset - the October/2020  
+- We only check the PM2.5 level. If the PM2.5 is within acceptable level, so is PM10.
 - Most of the days are in good condition, now that the bush fire has been controlled!
 ]
+---
+# Final takeaway
+#### The bush fire seemed to have a negative influence over the air quality in Melbourne. 
+
+--
+
+#### The smoke from the fire had caused the level of PM2.5 and PM10 increased in the air, making the air quality dropped.
+
+---
+
+#### Now the air quality is all greeny good! 
+
+
 ---
 ## Appendix
 ### Sensors' location
 
-<div id="htmlwidget-972719987c13890263dc" style="width:100%;height:432px;" class="leaflet html-widget"></div>
-<script type="application/json" data-for="htmlwidget-972719987c13890263dc">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]},{"method":"addMarkers","args":[[-37.800524,-37.800575,-37.800793,-37.800629,-37.8023],[144.964122,144.964635,144.966492,144.965052,144.960923],null,null,null,{"interactive":true,"draggable":false,"keyboard":true,"title":"","alt":"","zIndexOffset":0,"opacity":1,"riseOnHover":false,"riseOffset":250},["arc1046","arc1048","arc1045","arc1050","arc1047"],null,null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"setView":[[-37.80052,144.9641],17,[]],"limits":{"lat":[-37.8023,-37.800524],"lng":[144.960923,144.966492]}},"evals":[],"jsHooks":[]}</script>
+<div id="htmlwidget-1976d1c2ece2bdef46c2" style="width:100%;height:432px;" class="leaflet html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1976d1c2ece2bdef46c2">{"x":{"options":{"crs":{"crsClass":"L.CRS.EPSG3857","code":null,"proj4def":null,"projectedBounds":null,"options":{}}},"calls":[{"method":"addTiles","args":["//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",null,null,{"minZoom":0,"maxZoom":18,"tileSize":256,"subdomains":"abc","errorTileUrl":"","tms":false,"noWrap":false,"zoomOffset":0,"zoomReverse":false,"opacity":1,"zIndex":1,"detectRetina":false,"attribution":"&copy; <a href=\"http://openstreetmap.org\">OpenStreetMap<\/a> contributors, <a href=\"http://creativecommons.org/licenses/by-sa/2.0/\">CC-BY-SA<\/a>"}]},{"method":"addMarkers","args":[[-37.800524,-37.800575,-37.800793,-37.800629,-37.8023],[144.964122,144.964635,144.966492,144.965052,144.960923],null,null,null,{"interactive":true,"draggable":false,"keyboard":true,"title":"","alt":"","zIndexOffset":0,"opacity":1,"riseOnHover":false,"riseOffset":250},["arc1046","arc1048","arc1045","arc1050","arc1047"],null,null,null,null,{"interactive":false,"permanent":false,"direction":"auto","opacity":1,"offset":[0,0],"textsize":"10px","textOnly":false,"className":"","sticky":true},null]}],"setView":[[-37.80052,144.9641],17,[]],"limits":{"lat":[-37.8023,-37.800524],"lng":[144.960923,144.966492]}},"evals":[],"jsHooks":[]}</script>
 
 ---
-
 class: center, middle
 
 # Thank you!
@@ -395,6 +548,7 @@ library(kableExtra)
 library(ggthemes)
 library(knitr)
 library(xaringanthemer)
+library(leaflet)
 ```
 --
 

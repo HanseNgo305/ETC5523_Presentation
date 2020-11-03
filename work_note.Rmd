@@ -84,6 +84,21 @@ sensor_reading_location %>%
   count(value)
 ```
 
+```{r}
+# check only the type of sensor used
+check_sensor <- c("0a.EPA-24h","0b.EPA-24h")
+
+# 15/11 has 15 timeslots (starting from 9:00 to 23:00), other has 24 timeslots except for the last day having only 5
+sensor_reading_location %>%
+  filter(sensor_id %in% check_sensor) %>%
+  mutate(time = strftime(local_time, format="%H:%M:%S", tz = "UTC"),
+         day = day(local_time),
+         month = month(local_time, abbr = TRUE),
+         year = year(local_time)) %>%
+  group_by(year, month, day, site_id) %>%
+  count(day)
+```
+
 The number of error reading is small --> acceptable. We choose 1h and 24h to refer from the EPA guideline of safety and national standard.
 
 ```{r}
@@ -122,6 +137,12 @@ daily_pm_2.5 <- sensor_reading_location %>%
   filter(time == max(time))
 ```
 
+```{r check-daily-pm-2.5}
+daily_pm_2.5 %>%
+  group_by(year, month, day) %>%
+  count(site_id)
+```
+
 ## plotting
 
 ```{r daily-pm2.5-plot}
@@ -155,6 +176,9 @@ daily_avg_pm_2.5 %>%
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
   ggtitle("Daily air quality identified by PM2.5") +
   xlab("Day")
+
+## Total days of observation is max(sensor_reading_location$local_time) - min(sensor_reading_location$local_time)
+## However this only has 344 rows, lacking the observation on 24th January 2020
 ```
 
 ## count the number of good day and bad day

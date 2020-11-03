@@ -26,6 +26,7 @@ library(naniar)
 library(ggplot2)
 library(patchwork)
 library(leaflet)
+library(kableExtra)
 ```
 
 ```{r xaringan-themer, include=FALSE, warning=FALSE}
@@ -39,13 +40,6 @@ style_duo_accent(
 ```
 
 ```{css, echo = FALSE}
-.remark-code {
-  font-size:24px;
-}
-.tiny .remark-code {
-  font-size: 50%;
-}
-
 table-head {
   font-size: 10px;     
 }
@@ -105,7 +99,7 @@ class: center, middle
 ---
 class:table-head
 
-## Dataset employed
+## Dataset used
 
 ```{r xaringan-panelset, echo=FALSE} 
 xaringanExtra::use_panelset() 
@@ -114,6 +108,7 @@ xaringanExtra::use_panelset()
 ```{r read-data, include = FALSE, echo=TRUE}
 sensor_location <- read.csv(here::here("data", "Microclimate_Sensor_Locations.csv"))
 sensor_reading <- read.csv(here::here("data", "Microclimate_Sensor_Readings.csv"))
+type_metadata <- read.csv(here::here("data", "type_metadata.csv"))
 fire_archive <- read.csv(here::here("data", "fire_archive_V1_101674.csv")) %>%
   select(latitude, longitude, acq_date, frp)
 fire_nrt <- read.csv(here::here("data", "fire_nrt_V1_101674.csv")) %>%
@@ -143,7 +138,15 @@ fire_location <- fire_location %>%
 .panelset[
 .panel[.panel-name[Reading]
 ```{r read-sensor-reading, echo = FALSE}
-knitr::kable(head(sensor_reading,5), format = 'html')
+reading_structure <- tribble(~Variable, ~Description,
+                             "id", "Unique id for each record in the dataset",
+                             "site_id", "Location id",
+                             "sensor_id", "Sensor id",
+                             "value", "Value of reading",
+                             "local_time", "Local date and time",
+                             "type", "Type of sensor",
+                             "units", "Units of measurement")
+knitr::kable(head(reading_structure), format = 'html')
 ```
 
 ]
@@ -173,39 +176,51 @@ knitr::kable(head(fire_location,5), format = 'html')
 - Data provided from sensor reading runs from `r as.Date(min(sensor_reading_location$local_time), format = "%d-%B-%y")` to `r as.Date(max(sensor_reading_location$local_time), format = "%d-%B-%y")`
 - Data provided from NASA fire satellite runs from `r min(fire_location$acq_date)` to `r max(fire_location$acq_date)`
 ]
-
 ---
-## Variables
-
+## What types to use?
 > EPA monitors the quality of air in Victoria. We do this by measuring the air for pollutants that can affect human health. We measure for several common pollutants such as particles (PM2.5 and PM10), ozone and nitrogen dioxide. 
 _(EPA Victoria)_
 
---
-
-### So we chose...
-- PM2.5: Mass density of particles in the air smaller than 2.5 micrometers in diameter.  
-
---
-
-- PM10: Mass density of particles in the air smaller than 10 micrometers in diameter.  
-
---
-
-- PM2.5-EPA-24h: Mass density of particles in the air smaller than 2.5 micrometers in diameter, 24 hour rolling average.  
-
---
-
-- PM10-EPA-24h: Mass density of particles in the air smaller than 10 micrometers in diameter, 24 hour rolling average.
-
----
-class: center, middle
-
-# Let's start digging
-
----
-## Daily level of PM 2.5
-
 .pull-left[
+```{r read-type, echo = FALSE}
+type_metadata %>%
+  select(-Type.) %>%
+  knitr::kable(format = 'html') %>%
+  row_spec(c(4,6), background = "yellow") %>%
+  kable_styling(font_size = 7)
+```
+]
+
+--
+```{r check-error-prep, echo = TRUE, include=FALSE}
+# Check the errorneous in reading
+test1 <- sensor_reading %>%
+  left_join(sensor_location, by = "site_id") %>%
+  filter(sensor_id %in% c("0a.EPA-1h.PKIND", "0b.EPA-1h.PKIND"))
+
+check_error <- test1 %>%
+  filter(value == 0) %>%
+  group_by(local_time) %>%
+  count(value) %>%
+  rename(count = n) %>%
+  arrange(local_time)
+```
+
+.pull-right[
+- There is a total of `r nrow(test1)` observations for the two types: `0a.EPA-1h.PKIND` and `0b.EPA-1h.PKIND`.
+- We only have 7 readings that had low confidence in reading (14 for both types) as below:
+
+.left[
+```{r check-error, echo = FALSE, message=FALSE, warning = FALSE, fig.align="left"}
+knitr::kable(check_error,format = 'html') %>%
+  kable_styling(font_size = 8)
+```
+]
+- The erroneous readings were minimal -> We are happy with using the full set.
+]
+
+---
+## Can we trust the data?
 ```{r clean-reading-location, include = FALSE, echo=TRUE}
 # Choose the selected sensor_id
 select_sensor <- c("0a.EPA-1h", "0a.EPA-24h", "0b.EPA-1h", "0b.EPA-24h")
@@ -226,6 +241,50 @@ daily_pm_2.5 <- sensor_reading_location %>%
   filter(time == max(time))
 ```
 
+.pull-left[
+.panelset[
+.panel[.panel-name[vismiss]
+```{r missing-check,echo = FALSE, message= FALSE, warning= FALSE, fig.retina=4}
+vis_miss(sensor_reading_location, warn_large_data = FALSE)
+```
+]
+.panel[.panel-name[daycheck]
+```{r check-missing, echo = FALSE, message= FALSE, warning= FALSE, fig.retina=4, fig.height=6}
+# check only the type of sensor used
+check_sensor <- c("0a.EPA-24h","0b.EPA-24h")
+
+sensor_reading_location %>%
+  filter(sensor_id %in% check_sensor) %>%
+  group_by(local_time) %>%
+  ggplot(aes(x = local_time, y = value)) +
+  geom_bar(stat = "identity",fill = "orange") +
+  facet_wrap(~site_id)+
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+  theme_minimal()
+```
+
+]
+]]
+
+.pull-right[
+**Note**
+
+- Using vismiss is not enough to identify the missing values.
+- We visualise the reading for all of the days in the dataset for each sensor 
+  - Not all sensors have full data recorded.
+  - In **24th January 2020**, there is no data recorded for all of the sensors.
+- The overall pattern of all the sensors appreared similar -> average all sensors to account for daily reading.
+]
+---
+class: center, middle
+
+# Let's start digging
+
+---
+## Daily level of PM 2.5
+
+.pull-left[
 ```{r daily-pm2.5-plot-prep, include = FALSE, echo=TRUE}
 # obtain daily average regardless of site_id
 daily_avg_pm_2.5 <- daily_pm_2.5 %>%
@@ -270,9 +329,17 @@ knitr::include_graphics(here::here("images","standard-2.5.png"))
 ]
 .panel[.panel-name[Findings]
 - In most of the days, Melbourne has good air quality.  
-- 
-
-
+- From mid-December 2019 to early Feb 2020, air quality dropped drastically with January being the worst month. Only half the days having the "Good" and "Moderate" air quality, the rest were "Poor" and "Very poor" with 1 "Hazardous" day.
+```{r AQ-count-2.5,include = FALSE, echo=TRUE}
+day_count_2.5 <- daily_avg_pm_2.5 %>%
+  mutate(day = day(local_time),
+         month = month(local_time, abbr = TRUE),
+         year = year(local_time)) %>%
+  group_by(year, month) %>%
+  count(air_quality_2.5)
+day_count_2.5
+```
+- One day in July had "poor" quality.
 ]
 ]]
 ---
@@ -333,13 +400,14 @@ knitr::include_graphics(here::here("images","standard-10.png"))
 ]
 
 .panel[.panel-name[Findings]
-- xxx
+- Similar to PM 2.5, the PM10 had the same period where the air quality wasdropped terribly.
+- January again had some days that the air quality was terrible with an exeptionally high level of PM10.
 
 
 ]
 ]]
 ---
-## What about fire occurence?
+## What about fire occurrence?
 ```{r fire-locate, include = FALSE, echo=TRUE}
 day_frp <- fire_location %>% 
   group_by(acq_date) %>%
@@ -394,12 +462,22 @@ knitr::include_graphics(here::here("images","combined-plot.png"))
 ```
 <img src="images/combined-plot.png" width="1000" height="530">
 ---
+## A lag in days
+
+```{r smoke-live, echo = TRUE, message=FALSE,warning=FALSE, echo=FALSE,}
+knitr::include_url("https://www.nbcnews.com/science/environment/scientists-find-australian-wildfire-smoke-has-circled-globe-n1116511")
+```
+
+Source: [NBC News Digital](https://www.nbcnews.com/science/environment/scientists-find-australian-wildfire-smoke-has-circled-globe-n1116511)
+
+
+---
 ## How is the current air quality?
 
 .pull-left[
 ```{r current-air, warning = FALSE, message=FALSE, echo = FALSE, fig.retina=4}
 daily_avg_pm_2.5 %>%
-  filter(local_time > "2020-09-30") %>%
+  filter(local_time >= "2020-10-01") %>%
   ggplot(aes(x = local_time, y = value, fill = air_quality_2.5)) +
   geom_bar(stat = "identity") +
   scale_fill_manual(values = quality_colour$Color) +
@@ -414,22 +492,34 @@ daily_avg_pm_2.5 %>%
 ]
 
 .pull-right[
-- Now is the October - 2020  
-- We only see PM2.5. If the PM2.5 is within acceptable level, so is PM10.
+- Now is latest month in the dataset - the October/2020  
+- We only check the PM2.5 level. If the PM2.5 is within acceptable level, so is PM10.
 - Most of the days are in good condition, now that the bush fire has been controlled!
 ]
+---
+# Final takeaway
+#### The bush fire seemed to have a negative influence over the air quality in Melbourne. 
+
+--
+
+#### The smoke from the fire had caused the level of PM2.5 and PM10 increased in the air, making the air quality dropped.
+
+---
+
+#### Now the air quality is all greeny good! 
+
+
 ---
 ## Appendix
 ### Sensors' location
 
-```{r out.width='100%', fig.height=6, eval=require('leaflet'), echo = FALSE}
+```{r sensor-map, out.width='100%', fig.height=6, eval=require('leaflet'), echo = FALSE}
 library(leaflet)
 leaflet(data = sensor_location) %>% addTiles() %>% setView(lat = -37.80052, lng = 144.9641, zoom = 17) %>%
   addMarkers(~longitude, ~latitude, popup = ~as.character(site_id))
 ```
 
 ---
-
 class: center, middle
 
 # Thank you!
@@ -445,6 +535,7 @@ library(kableExtra)
 library(ggthemes)
 library(knitr)
 library(xaringanthemer)
+library(leaflet)
 ```
 --
 
