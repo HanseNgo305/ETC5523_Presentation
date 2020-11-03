@@ -88,6 +88,13 @@ class: center, middle
 class: center, middle
 
 # When is the bush fire season?
+#### The **"Australian Bush Fire season"** started in Victoria from 21 November 2019. All significant fires in Victoria were declared contained on 27 February 2020. <sup> 1 </sup>
+#### By 31 March 2020, the bush fire season is considered ended <sup> 2 </sup>
+
+.footnote[
+[1] Source: https://en.wikipedia.org/wiki/2019%E2%80%9320_Australian_bushfire_season#Victoria  
+[2] Source: https://www.aljazeera.com/news/2020/3/31/australias-devastating-bushfire-season-comes-to-an-end
+]
 
 
 ---
